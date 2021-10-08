@@ -2,34 +2,29 @@
 
 namespace Beycan\WPTable;
 
-/**
- * Table skeleton
- * 
- * @package Beycan\WPTable\TableSkeleton
- * @version 1.0
- * @author halilbeycan0@gmail.com
- */
-
 class TableSkeleton extends \WP_List_Table
 {
     /**
      * Item to show per page
      * @var int
-     * @since 1.0
      */
     private $perPage = 10;
+
+    /**
+     * Total item count
+     * @var int
+     */
+    private $totalRow = 0;
     
     /**
      * To access the constructor of this table
      * @var Table
-     * @since 1.1
      */
     private $table;
     
     /**
      * Columns to be used for sorting
      * @var array
-     * @since 1.0
      */
     private $sortableColumns = [];
 
@@ -40,15 +35,52 @@ class TableSkeleton extends \WP_List_Table
      * 
      * @return void
      */
-
     public function setTable(Table $table): void
     {
         $this->table = $table;
     }
 
     /**
+     * total number of data to be paged
+     * 
+     * @param int $totalRow
+     * 
+     * @return void
+     */
+    public function setTotalRow(int $totalRow): void
+    {
+        $this->totalRow = $totalRow;
+    }
+    
+
+    /**
+     * Sets the data the table displays per page.
+     * 
+     * @param int $perPage
+     * 
+     * @return void
+     */
+    public function setPerPage(int $perPage): void
+    {
+        $this->perPage = $perPage;
+    }
+
+    /**
+     * Set the columns with sorting feature in the table.
+     * 
+     * @param array $sortableColumns
+     * 
+     * @return void
+     */
+    public function setSortableColumns(array $sortableColumns): void
+    {
+        array_map(function($column) {
+            $this->sortableColumns[$column] = [$column, true];
+        }, $sortableColumns);
+    }
+
+    /**
      * Prepares and shows the table.
-     * @since 1.0
      * 
      * @return void
      */
@@ -72,23 +104,19 @@ class TableSkeleton extends \WP_List_Table
             <?php
         }
 
-        $headerElements = '';
         if (!empty($this->table->headerElements)) {
+            $headerElements = '';
             foreach ($this->table->headerElements as $func) {
-                ob_start();
-                call_user_func($func);
-                $headerElements .= ob_get_clean();
+                $headerElements .= call_user_func($func);
             }
+            echo $headerElements;
         }
-
-        echo $headerElements;
 
         $this->display();
     }
 
     /**
      * Makes our table ready to be shown.
-     * @since 1.0
      * 
      * @return void
      */
@@ -101,56 +129,20 @@ class TableSkeleton extends \WP_List_Table
 
         // Set pagination variables
         $currentPage = $this->get_pagenum();
-        $totalRow = count($this->table->dataList);
+        $totalRow = $this->totalRow > 0 ? $this->totalRow : count($this->table->dataList);
         
         $this->set_pagination_args([
             'total_items' => $totalRow,
             'per_page'    => $this->perPage
         ]);
 
-        $this->items = array_slice(
-            $this->table->dataList, 
-            (($currentPage - 1) * $this->perPage), 
-            $this->perPage
-        );
+        $this->items = array_slice($this->table->dataList, 0, $this->perPage);
 
-        $this->_column_headers = array(
-            $this->table->columns, [], 
-            $this->sortableColumns
-        );
-    }
-
-    /**
-     * Sets the data the table displays per page.
-     * @since 1.0
-     * 
-     * @param int $perPage
-     * 
-     * @return void
-     */
-    public function setPerPage(int $perPage): void
-    {
-        $this->perPage = $perPage;
-    }
-
-    /**
-     * Set the columns with sorting feature in the table.
-     * @since 1.0
-     * 
-     * @param array $sortableColumns
-     * 
-     * @return void
-     */
-    public function setSortableColumns(array $sortableColumns): void
-    {
-        array_map(function($column) {
-            $this->sortableColumns[$column] = [$column, true];
-        }, $sortableColumns);
+        $this->_column_headers = array($this->table->columns, [], $this->sortableColumns);
     }
 
     /**
      * Table columns to be submitted by the user
-     * @since 1.0
      * 
      * Mandatory and private for WordPress
      * 
@@ -163,7 +155,6 @@ class TableSkeleton extends \WP_List_Table
 
     /**
      * Columns to be used for sorting
-     * @since 1.0
      * 
      * Mandatory and private for WordPress
      * 
@@ -176,7 +167,6 @@ class TableSkeleton extends \WP_List_Table
 
     /**
      * Define what data to show on each column of the table
-     * @since 1.0
      * 
      * Mandatory and private for WordPress
      * 

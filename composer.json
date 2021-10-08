@@ -1,6 +1,6 @@
 {
     "name": "beycan/wp-table",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Create tables for WordPress very easily.",
     "keywords": ["wordpress", "wp-list-table", "table", "creator", "builder", "WP_List_Table", "examples"],
     "type": "library",

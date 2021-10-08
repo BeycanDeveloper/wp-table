@@ -9,19 +9,11 @@ if(!class_exists('WP_List_Table')){
     require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
-/**
- * Easily create tables in WordPress.
- * 
- * @package Beycan\WPTable\Table
- * @version 1.0
- * @author halilbeycan0@gmail.com
- */
 class Table
 {
     /**
      * Example of the created table
      * @var Table
-     * @since 1.0
      */
     private $table;
 
@@ -32,20 +24,17 @@ class Table
     /**
      * Table columns to be submitted by the user
      * @var array
-     * @since 1.0
      */
     public $columns = [];
 
     /**
      * Table data to be submitted by the user
      * @var array
-     * @since 1.0
      */
     public $dataList = [];
 
     /**
      * Actions are taken to create a new table instance
-     * @since 1.0
      * 
      * @param array $columns Table columns to be submitted by the user
      * @param array $dataList Table data to be submitted by the user
@@ -66,7 +55,6 @@ class Table
 
     /**
      * Prepare table data list
-     * @since 1.0
      * 
      * @return void
      */
@@ -85,15 +73,14 @@ class Table
 
             if (!empty($this->hooks)) {
                 array_map(function($hooks) use (&$item) {
-                    foreach ($hooks as $key => $func) {
+                    foreach($hooks as $key => $func) {
                         $item[$key] = call_user_func($func, (object) $item);
                     }
                 }, $this->hooks);
             }
             
             if (isset($this->options['search']) && isset($_GET['s']) && !empty($_GET['s'])) {
-                $result = preg_grep('~' . preg_quote($_GET['s'], '~') . '~', $item);
-                $add = $result ? true : false;
+                $add = preg_grep('~' . preg_quote($_GET['s'], '~') . '~', $item) ? true : false;
             }
             
             $item = array_intersect_key($item, array_flip($columnsKeys));
