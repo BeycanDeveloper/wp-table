@@ -34,6 +34,12 @@ class Table
     public $dataList = [];
 
     /**
+     * Columns to exclude from search
+     * @var array
+     */
+    public $columnsExcludeFromSearch = [];
+
+    /**
      * Actions are taken to create a new table instance
      * 
      * @param array $columns Table columns to be submitted by the user
@@ -79,8 +85,14 @@ class Table
                 }, $this->hooks);
             }
             
-            if (isset($this->options['search']) && isset($_GET['s']) && !empty($_GET['s'])) {
-                $add = preg_grep('~' . preg_quote($_GET['s'], '~') . '~', $item) ? true : false;
+            if ($this->searchInTable()) {
+                $searchItem = $item;
+                if (!empty($this->columnsExcludeFromSearch)) {
+                    $searchItem = array_filter($searchItem, function($key) {
+                        return !in_array($key, $this->columnsExcludeFromSearch);
+                    }, ARRAY_FILTER_USE_KEY);
+                }
+                $add = preg_grep('~' . preg_quote($_GET['s'], '~') . '~', $searchItem) ? true : false;
             }
             
             $item = array_intersect_key($item, array_flip($columnsKeys));
@@ -89,6 +101,30 @@ class Table
                 $this->dataList[] = $item;
             }
         }
+
+        if ($this->searchInTable()) {
+            $this->setTotalRow(count($this->dataList));
+        }
+    }
+
+    private function searchInTable()
+    {
+        if (isset($this->options['search'])) {
+            if (isset($this->options['searchInTable']) && $this->options['searchInTable'] === false) {
+                return false;
+            } elseif (isset($_GET['s']) && !empty($_GET['s'])) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public function columnsExcludeFromSearch(array $columns)
+    {
+        $this->columnsExcludeFromSearch = $columns;
     }
 
     public function addHooks(array $hooks) 
